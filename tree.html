@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        li {
+            list-style: none;
+        }
+        .tLi {
+            margin-left: 20px;
+        }
+        .ul-li {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <ul class="ul">
+
+    </ul>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        var data = [
+            {
+                name: "第一节",
+                children: [
+                    {
+                        name: "1.1"
+                    }
+                ]
+            },
+            {
+                name: "第二节",
+                children: [
+                    {
+                        name: "2.1",
+                        children: [
+                            {
+                                name: "3.1"
+                            }
+                        ],
+
+                    },
+                    {
+                        name: "2.2"
+                    }
+                ]
+            },
+            {
+                name: "第二节",
+                children: [
+                    {
+                        name: "2.1",
+                        children: [
+                            {
+                                name: "3.1"
+                            },
+                            {
+                                name: "3.2"
+                            },
+                            {
+                                name: "3.3"
+                            }
+                        ],
+                    },
+                ]
+            }
+        ];
+        // 动态创建树形结构的DOM
+        function createTree(data, html) {
+            for (var i = 0; i < data.length; i++) {
+                // 判断是否有子菜单 如果有子菜单，先创建父菜单，创建完后再调用一次createTree函数
+                if (data[i].children) {
+                    var x = $('<li><input type="checkbox"/>' + data[i].name + '</li>')
+                    html.append(x);
+                    var ul = $('<ul class="ul-li"></ul>')
+                    x.append(ul)
+                    createTree(data[i].children, ul)
+                } else {
+                    // 如果没有子菜单 直接创建标签
+                    html.append($('<li><input type="checkbox"/>' + data[i].name + '</li>'))
+                }
+            }
+        }
+        // 点击事件 传入事件对象
+        function check(e) {
+            var target = e.target;
+            // 判断点击的是否是checkbox 如果是 执行选择的函数，否则执行展开的函数
+            if (target.type) {
+
+                choose(target);
+                return
+            }
+
+            isShow(target)
+        }
+        //  展开树形结构函数
+        function isShow(target) {
+            $(target).children('.ul-li').toggle()
+        }
+        // 全选与全不选
+        function choose(target) {
+           
+            // 判断checkbox是否选中 若选中 则让它下面的checkbox也选中 全选
+            if ($(target).is(':checked')) {
+                $(target).siblings("ul").find("input").prop('checked', true);
+                
+            }
+            // 若没有选择 则让他下面的checkbox 全部取消
+            if (!$(target).is(':checked')) {
+                $(target).siblings("ul").find("input").prop('checked', false);
+                
+            }
+             // 判断是否是第一级结构 若不是一级 则调用fbtt函数
+             if (!$(target).parent().parent().hasClass("ul")) {
+                fbtt(target);
+            }
+           console.log($(target).is(":checked"))
+            
+        }
+        function fbtt(target) {
+            // 先找到点击的checkbox与它同级的所共有checkbox
+            var dom = $(target).parent().parent().children().find("input");
+            var flag = true;
+            // 循环找到点击的checkbox以及与他同级所有checkbox 判断它们的checkbox是否都选择 若都选中 则 flag=ture 否则为false；
+            $.each(dom, function (index, obj) {
+                if (!$(dom[index]).is(":checked")) {
+                    flag = false;
+                    return;
+                }
+            })
+            // 如果都选择中 则它的父级节点的checkbox也应选择 反之亦然
+            if (flag) {
+                $(target).parent().parent().siblings("input").prop("checked", true)
+            } else {
+                $(target).parent().parent().siblings("input").prop("checked", false)
+            }
+            // 判断点击的checkbox 是否是第二级节点 如果不是 再调用zjdf()函数
+            if (!$(target).parent().parent().parent().parent().hasClass("ul")) {
+                fbtt($(target).parent().parent())
+            }
+        }
+
+        createTree(data, $('.ul'));
+        // 事件委托 将所有的事件委托给.ul
+        $(".ul").on("click", check)
+    </script>
+</body>
+
+</html>
