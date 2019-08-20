@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+ <html>
+<head>
+	<meta charset="UTF-8">
+<style>
+	.tree{
+		padding-left:30px;
+	}
+	#btn{
+		position: fixed;
+		top:30px;
+		right:20px
+	}
+</style>
+</head>
+<body>
+	<button id='btn'>查看被选中的id</button>
+	<div id='tree'></div>
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript">
+token="123"
+	$.ajax({
+		url:"../data.json?",
+		// processData:false,
+		contentType:'application/json;charset=utf-8',
+		token:token,
+		type:'get',
+		dataType:'json',
+		success(data){
+			console.log(data);
+			// obj=data.result.deptCateList
+			pushdata(data.result.deptCateList)
+		}
+	})
+	
+	// var obj = 
+	function pushdata(data){
+	var tree = document.getElementById('tree')
+	// console.log(obj)
+	var ids
+	function setTree(data,dom){
+		data.map((item)=>{
+			if(item.subList.length==0){
+				var div = $('<div class="tree"><input type="checkbox" id="'+item.id+'">'+item.deptName+'</div>')
+				dom.append(div[0])
+			}else{
+				var div = $('<div class="tree tog" tog="tog"><input type="checkbox" id="'+item.id+'">'+item.deptName+'</div>')
+				dom.append(div[0])
+				setTree(item.subList,div)
+			}
+		})
+	}
+	setTree(data,tree)
+	
+	$('input:checkbox').change(function(e){
+		if($(this).is(":checked")){
+			$(this).siblings().find('input').prop("checked", true);
+			var elm = $(this).parents('.tog');
+			var _that = $(this)
+			xxd(elm,_that)
+		}else{
+			$(this).siblings().find('input').prop("checked", false);
+			$(this).parents().siblings('input').prop("checked", false)
+		}
+		ids = [];
+		$("input:checked").each(function(){
+			ids.push(($(this).attr('id')))
+		})
+		console.log(ids)
+	})
+	function xxd(el,_that){
+		for(var i = 0;i<el.length;i++){
+			if(el.eq(i).children('.tog').length!=0){
+				if(el.eq(i).find('input:checked').length+1==el.eq(i).find('input').length){
+					el.eq(i).children('input').prop("checked", true)
+				}
+				for(var j = 0;j<el.eq(i).children('.tog').length;j++){
+					xxd(el.eq(i).children('.tog'))
+				}
+			}else{
+				if(el.eq(i).find('input:checked').length+1==el.eq(i).find('input').length){
+					_that.parent().siblings('input').prop("checked", true)
+				}
+			}
+		}
+	}
+	$('#btn').click(function(){
+		console.log(ids)
+	})
+	}
+
+arr={a:"1"}
+	const shallBasicCopy = obj => 
+  JSON.parse(JSON.stringify(obj))
+
+
+var b = shallBasicCopy(arr)
+console.log(b)
+console.log(arr)
+arr.b="5"
+console.log(b)
+console.log(arr)
+</script>
+</body>
+ </html>
